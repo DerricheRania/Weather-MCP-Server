@@ -254,7 +254,6 @@ The new tool appears automatically, no rebuild needed.
 
 | Superpower | Free API | Example prompt for AI |
 |------------|----------|-----------------------|
-| 💱 Currency converter | [frankfurter.app](https://www.frankfurter.app/) | "Convert 100 USD to DZD" |
 | 🌍 Country info | [restcountries.com](https://restcountries.com/) | "Tell me about Algeria" |
 | 📰 Latest news | [newsapi.org](https://newsapi.org/) | "What's in the news today?" |
 | 🎬 Movie info | [omdbapi.com](https://www.omdbapi.com/) | "Tell me about Interstellar" |
