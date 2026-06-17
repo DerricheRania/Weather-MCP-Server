@@ -1,4 +1,4 @@
-# 🌤️ Weather MCP Server
+# 🌤️ MCP Toolkit Server
 
 A **Model Context Protocol (MCP)** server that gives AI the superpower to fetch real-time weather for any city in the world, using the [Open-Meteo API](https://open-meteo.com/), which is 100% free with no API key needed.
 
