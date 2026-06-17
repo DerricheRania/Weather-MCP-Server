@@ -37,30 +37,26 @@ The MCP server is a Node.js process. The AI client launches it automatically and
 
 ---
 
-## 🛠️ This Project : Weather MCP Server
+## 🛠️ This Project — Two Tools
 
-This project builds an MCP server with one tool: **`get_weather`**.
-
-### The tool
+### Tool 1: `get_weather`
 
 | Property | Value |
 |----------|-------|
 | **Name** | `get_weather` |
-| **Description** | Get current weather and 3-day forecast for any city in the world |
-| **API** | [Open-Meteo](https://open-meteo.com/) + [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) |
-| **API Key** | ❌ Not required completely free |
+| **Description** | Get current weather and 3-day forecast for any city |
+| **API** | [Open-Meteo](https://open-meteo.com/) + Geocoding API |
+| **API Key** | ❌ Not required |
 
-### How the API call works
+The tool makes two API calls under the hood:
 
-The tool makes **two API calls** under the hood:
-
-**Step 1 : Convert city name to coordinates (Geocoding API):**
+**Step 1 — Convert city name to coordinates:**
 ```
-GET https://geocoding-api.open-meteo.com/v1/search?name=Algiers&count=1
+GET https://geocoding-api.open-meteo.com/v1/search?name=Algiers
 → Returns: { latitude: 36.73, longitude: 3.08, country: "Algeria" }
 ```
 
-**Step 2 : Fetch weather using coordinates (Weather API):**
+**Step 2 — Fetch weather using coordinates:**
 ```
 GET https://api.open-meteo.com/v1/forecast?latitude=36.73&longitude=3.08
        &current=temperature_2m,humidity,wind_speed,weather_code
@@ -68,34 +64,37 @@ GET https://api.open-meteo.com/v1/forecast?latitude=36.73&longitude=3.08
 → Returns: live weather + 3-day forecast
 ```
 
-### Parameters
+**Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `city` | string | ✅ Yes | Any city name — `Algiers`, `Paris`, `Tokyo`, `New York`... |
+| `city` | string | ✅ Yes | Any city — `Algiers`, `Paris`, `Tokyo`... |
 | `units` | enum | ❌ No | `metric` for °C (default) or `imperial` for °F |
 
-### Example output
+---
 
-```
-🌍 Weather for Algiers, Algeria
-───────────────────────────────────
-🌤️  Now:        ☁️  Overcast
-🌡️  Temp:       21.5°C (feels like 24.5°C)
-💧 Humidity:   86%
-💨 Wind:       2.9 km/h
+### Tool 2: `convert_currency`
 
-📅 3-Day Forecast:
-  Thursday, Jun 18
-    🌦️  Rain showers
-    Min: 22.3°C  Max: 30.2°C  🌧️ Rain: 0.1mm
-  Friday, Jun 19
-    🌫️  Foggy
-    Min: 22.8°C  Max: 29.1°C  🌧️ Rain: 0.4mm
-  Saturday, Jun 20
-    ☁️  Overcast
-    Min: 21.0°C  Max: 27.5°C
+| Property | Value |
+|----------|-------|
+| **Name** | `convert_currency` |
+| **Description** | Convert an amount from one currency to another using live exchange rates |
+| **API** | [ExchangeRate-API](https://open.er-api.com/) |
+| **API Key** | ❌ Not required |
+
+**How the API call works:**
 ```
+GET https://open.er-api.com/v6/latest/USD
+→ Returns: { rates: { DZD: 133.15, EUR: 0.91, GBP: 0.78, JPY: 160.35, ... } }
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `from` | string | ✅ Yes | Source currency code — `USD`, `EUR`, `GBP`, `DZD`... |
+| `to` | string | ✅ Yes | Target currency code — `DZD`, `JPY`, `MAD`, `USD`... |
+| `amount` | number | ✅ Yes | Amount to convert — `100`, `500`, `1000`... |
 
 ---
 
@@ -103,10 +102,11 @@ GET https://api.open-meteo.com/v1/forecast?latitude=36.73&longitude=3.08
 
 ```
 weather-mcp/
-├── server.js       ← The MCP server defines the get_weather tool
+├── server.js       ← The MCP server defines both tools
 ├── test.js         ← Local test script runs without any AI
 ├── package.json    ← Project dependencies
-└── README.md       ← This file
+├── README.md       ← This file
+└── screenshots/    ← Proof it works
 ```
 
 ---
@@ -115,63 +115,85 @@ weather-mcp/
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v18 or higher check with `node -v`
+- [Node.js](https://nodejs.org/) v18 or higher, check with `node -v`
 
 ### Step 1 : Install dependencies
 
-Open a terminal inside the `weather-mcp` folder and run:
+Open a terminal inside the `weather-mcp` folder:
 
 ```bash
 npm install
 ```
 
-### Step 2 : Test the tool directly in the terminal
-
-This runs the weather logic directly and prints real results, no AI, no inspector needed:
+### Step 2 : Test directly in the terminal
 
 ```bash
 node test.js
 ```
 
+This runs all tools and prints real results, no AI needed.
+
 ---
 
-## ✅ Results — It Works!
+## ✅ Results : Everything Works!
 
-### Terminal test results
+### Weather tests
 
 **Algiers, Algeria:**
 
-![Terminal test : Algiers](test-algiers.png)
+![Terminal test : Algiers](screenshots/test-algiers.png)
 
 **Paris, France:**
 
-![Terminal test : Paris](test-paris.png)
+![Terminal test : Paris](screenshots/test-paris.png)
 
-**New York, USA (imperial units):**
+**New York, USA (imperial):**
 
-![Terminal test : New York](test-newyork.png)
+![Terminal test : New York](screenshots/test-newyork.png)
 
 ---
 
-### Testing with MCP Inspector
+### Currency converter tests
 
-MCP Inspector is an official Anthropic tool that gives you a browser UI to test your MCP server visually, without needing Claude Desktop or any AI subscription.
+**100 USD → DZD:**
 
-**Run it:**
+![Currency test : USD to DZD](screenshots/currency-usd-dzd.png)
+
+**50 EUR → USD:**
+
+![Currency test : EUR to USD](screenshots/currency-eur-usd.png)
+
+**200 GBP → JPY:**
+
+![Currency test : GBP to JPY](screenshots/currency-gbp-jpy.png)
+
+---
+
+### MCP Inspector : Both tools visible
+
+After connecting to the Inspector, both tools appear in the Tools list:
+
+![MCP Inspector : two tools listed](screenshots/inspector-two-tools.png)
+
+**Testing `convert_currency` in the Inspector (500 USD → JPY):**
+
+![MCP Inspector : currency form](screenshots/inspector-currency-form.png)
+
+**Result:**
+
+![MCP Inspector : currency result](screenshots/inspector-currency-result.png)
+
+---
+
+## 🧪 Testing with MCP Inspector
+
+MCP Inspector is an official Anthropic tool that lets you test your MCP server in a browser UI — no AI subscription needed.
 
 ```bash
 npx -y @modelcontextprotocol/inspector node server.js
 ```
 
-Open `http://localhost:5173` in your browser → click **Connect** → click **Tools** → select **get_weather** → fill in a city → click **Run Tool**.
-
-**Inspector tool form:**
-
-![MCP Inspector : tool form](inspector-tool.png)
-
-**Result for Tokyo, Japan:**
-
-![MCP Inspector : Tokyo result](inspector-result-tokyo.png)
+Open `http://localhost:5173` → click **Connect** → click **Tools** → pick a tool → fill in the fields → click **Run Tool**.
 
 ---
 
@@ -183,12 +205,10 @@ Find the config file:
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-Paste this (replace the path with your actual path):
-
 ```json
 {
   "mcpServers": {
-    "weather": {
+    "weather-currency": {
       "command": "C:\\Program Files\\nodejs\\node.exe",
       "args": ["C:\\Users\\YOUR_USERNAME\\Desktop\\weather-mcp\\server.js"]
     }
@@ -196,49 +216,50 @@ Paste this (replace the path with your actual path):
 }
 ```
 
-Save → fully quit Claude Desktop → reopen → look for the 🔧 icon in the chat input.
-
----
+Save → fully quit Claude Desktop → reopen → look for the 🔧 icon.
 
 ## ➕ How to Add a New Superpower
 
-Want to give your MCP server more tools? Here's exactly how to do it, using a **currency converter** as an example.
+Adding a new tool takes 3 steps. Here's an example — a **country info** tool:
 
 ### Step 1 : Add the tool in `server.js`
 
-Open `server.js` and add a new `server.tool()` block after the existing `get_weather` tool:
+After the last `server.tool(...)` block, add:
 
 ```javascript
 server.tool(
-  "get_currency",                                        // tool name
-  "Convert an amount from one currency to another.",     // description the AI reads
+  "get_country_info",
+  "Get general information about any country: capital, population, languages, region.",
   {
-    from: z.string().describe("Source currency code, e.g. USD, EUR, DZD"),
-    to: z.string().describe("Target currency code, e.g. EUR, GBP, MAD"),
-    amount: z.number().describe("Amount to convert"),
+    country: z.string().describe("Country name, e.g. Algeria, France, Japan"),
   },
-  async ({ from, to, amount }) => {
+  async ({ country }) => {
     try {
       const data = await httpGet(
-        `https://api.frankfurter.app/latest?amount=${amount}&from=${from}&to=${to}`
+        `https://restcountries.com/v3.1/name/${encodeURIComponent(country)}?fullText=true`
       );
-      const result = data.rates[to];
-      return {
-        content: [{
-          type: "text",
-          text: `💱 ${amount} ${from} = ${result} ${to}`
-        }]
-      };
+      const c = data[0];
+      const languages = Object.values(c.languages || {}).join(", ");
+      const currencies = Object.values(c.currencies || {}).map(x => x.name).join(", ");
+
+      let result = `🌍 ${c.name.common} (${c.name.official})\n`;
+      result += `${"─".repeat(35)}\n`;
+      result += `🏛️  Capital:     ${c.capital?.[0] || "N/A"}\n`;
+      result += `🌎 Region:      ${c.region} — ${c.subregion}\n`;
+      result += `👥 Population:  ${c.population.toLocaleString()}\n`;
+      result += `🗣️  Languages:   ${languages}\n`;
+      result += `💰 Currency:    ${currencies}\n`;
+      result += `🗺️  Area:        ${c.area.toLocaleString()} km²\n`;
+
+      return { content: [{ type: "text", text: result }] };
     } catch (err) {
-      return { content: [{ type: "text", text: `❌ Error: ${err.message}` }] };
+      return { content: [{ type: "text", text: `❌ Country "${country}" not found.` }] };
     }
   }
 );
 ```
 
-### Step 2 : Test it in the terminal
-
-Add a test case to `test.js` and run:
+### Step 2 : Test it
 
 ```bash
 node test.js
@@ -246,21 +267,22 @@ node test.js
 
 ### Step 3 : Restart the Inspector or Claude Desktop
 
-The new tool appears automatically, no rebuild needed.
+The new tool appears automatically — no rebuild needed.
 
 ---
 
 ### More superpower ideas
 
-| Superpower | Free API | Example prompt for AI |
-|------------|----------|-----------------------|
+| Superpower | Free API | Example prompt |
+|------------|----------|----------------|
 | 🌍 Country info | [restcountries.com](https://restcountries.com/) | "Tell me about Algeria" |
+| 😂 Random joke | [v2.jokeapi.dev](https://v2.jokeapi.dev/) | "Tell me a programming joke" |
 | 📰 Latest news | [newsapi.org](https://newsapi.org/) | "What's in the news today?" |
 | 🎬 Movie info | [omdbapi.com](https://www.omdbapi.com/) | "Tell me about Interstellar" |
-| 😂 Random joke | [v2.jokeapi.dev](https://v2.jokeapi.dev/) | "Tell me a programming joke" |
-| 🗺️ IP location | [ip-api.com](https://ip-api.com/) | "Where is IP 8.8.8.8 located?" |
+| 🗺️ IP location | [ip-api.com](https://ip-api.com/) | "Where is IP 8.8.8.8?" |
+| 📈 Stock price | [Yahoo Finance](https://finance.yahoo.com/) | "What's Apple's stock price?" |
 
-Every new tool follows the same 3-step pattern: **define → test → done**.
+Every new tool follows the same pattern: **define → test → done**.
 
 ---
 
@@ -269,6 +291,10 @@ Every new tool follows the same 3-step pattern: **define → test → done**.
 - [MCP Official Docs](https://modelcontextprotocol.io)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - [Open-Meteo API Docs](https://open-meteo.com/en/docs)
+- [ExchangeRate-API Docs](https://www.exchangerate-api.com/docs/free)
 - [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
+- [Ollama](https://ollama.com)
 
 ---
+
+
